@@ -63,7 +63,7 @@ We operate in the shadows of the attack surface — finding the flaws that matte
 ---
 
 **Languages**<br>
-C · C++ · Python · Rust · Go · ASM
+C++ · Python · Rust · Go · ASM
 
 **Tools**<br>
 Burp Suite · IDA Pro · Ghidra<br>
@@ -90,13 +90,13 @@ WinDBG · Metasploit · Foundry
 
 **Offensive Security Consultant**
 
-`Exploit Dev` · `Process Injection`<br>
-`UAC Bypass` · `C2 Frameworks` · `Evasion`
+`Exploit Dev` · `Social Engineering`<br>
+`Red Teamer` · `C2 Frameworks` · `AI Dev`
 
 ---
 
 **Languages**<br>
-C# · Python · Shell · PowerShell
+C# · Python · Bash · PowerShell
 
 **Tools**<br>
 Metasploit · Cobalt Strike<br>
@@ -129,7 +129,7 @@ Custom C2 · Memory Injectors
 ---
 
 **Languages**<br>
-C++ · JavaScript · Shell
+C · C++ · JavaScript · Bash · ASM
 
 **Tools**<br>
 Custom Injectors · API Fuzzers<br>
