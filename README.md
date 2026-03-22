@@ -58,7 +58,7 @@ We operate in the shadows of the attack surface — finding the flaws that matte
 **Offensive Security Engineer**
 
 `AI Red Teaming` · `Kernel Research`<br>
-`Bug Bounty` · `Smart Contracts` · `DMA`
+`Bug Bounty` · `Smart Contracts`
 
 ---
 
