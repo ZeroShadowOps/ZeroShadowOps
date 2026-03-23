@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZeroShadowOps — Offensive Security Research</title>
+<meta name="description" content="ZeroShadowOps [ZSO] — Elite offensive security collective. Vulnerability research, exploit development, red teaming.">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0a;--bg2:#0d1117;--bg3:#161b22;
+  --green:#00ff41;--green-dim:#00cc33;--green-glow:#00ff4133;
+  --red:#ff0040;--red-dim:#cc0033;--red-glow:#ff004033;
+  --purple:#9b59b6;--purple-dim:#7d3c98;
+  --cyan:#00d4ff;--yellow:#ffd700;
+  --text:#e6edf3;--text-dim:#8b949e;--text-muted:#484f58;
+  --border:#21262d;--border-light:#30363d;
+  --font:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--green) var(--bg)}
+body{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--green-dim);border-radius:3px}
+
+/* ═══ BOOT SEQUENCE ═══ */
+#boot-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;justify-content:center;align-items:center;transition:opacity .8s,visibility .8s}
+#boot-screen.done{opacity:0;visibility:hidden;pointer-events:none}
+#boot-log{font-size:13px;color:var(--green);max-width:600px;width:90%;line-height:1.8}
+#boot-log .line{opacity:0;animation:bootLine .1s forwards}
+#boot-log .ok{color:var(--green)}
+#boot-log .warn{color:var(--yellow)}
+#boot-log .fail{color:var(--red)}
+#boot-log .dim{color:var(--text-muted)}
+@keyframes bootLine{to{opacity:1}}
+
+/* ═══ MATRIX RAIN ═══ */
+#matrix{position:fixed;inset:0;z-index:0;opacity:.06;pointer-events:none}
+
+/* ═══ SCANLINE OVERLAY ═══ */
+body::after{content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);
+  animation:scanShift 10s linear infinite}
+@keyframes scanShift{0%{transform:translateY(0)}100%{transform:translateY(4px)}}
+
+/* ═══ NOISE GRAIN ═══ */
+body::before{content:'';position:fixed;inset:-50%;z-index:9997;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:.025;animation:grain 8s steps(10) infinite}
+@keyframes grain{0%,100%{transform:translate(0)}10%{transform:translate(-5%,-10%)}30%{transform:translate(3%,-15%)}50%{transform:translate(12%,9%)}70%{transform:translate(9%,4%)}90%{transform:translate(-1%,7%)}}
+
+/* ═══ LAYOUT ═══ */
+.container{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+section{padding:120px 0;position:relative}
+.section-tag{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+.section-title{font-size:clamp(28px,4vw,42px);font-weight:800;margin-bottom:48px;position:relative;display:inline-block}
+.section-title::before{content:'// ';color:var(--green)}
+
+/* ═══ NAV ═══ */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 0;backdrop-filter:blur(20px);background:rgba(10,10,10,.8);border-bottom:1px solid var(--border);transition:transform .3s}
+nav .container{display:flex;justify-content:space-between;align-items:center}
+.nav-brand{font-weight:800;font-size:16px;color:var(--green);text-decoration:none;letter-spacing:2px}
+.nav-brand span{color:var(--text-muted);font-weight:400}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{color:var(--text-dim);text-decoration:none;font-size:13px;letter-spacing:1px;text-transform:uppercase;transition:color .2s;position:relative}
+.nav-links a:hover{color:var(--green)}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--green);transition:width .3s}
+.nav-links a:hover::after{width:100%}
+@media(max-width:768px){.nav-links{display:none}}
+
+/* ═══ HERO ═══ */
+#hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden}
+.hero-content{position:relative;z-index:2}
+.hero-pre{font-size:13px;color:var(--text-muted);letter-spacing:6px;text-transform:uppercase;margin-bottom:24px}
+.hero-title{font-size:clamp(48px,8vw,96px);font-weight:800;line-height:1;letter-spacing:-2px;margin-bottom:16px;position:relative}
+.hero-title .glitch{position:relative;display:inline-block;color:var(--green)}
+.hero-title .glitch::before,.hero-title .glitch::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%}
+.hero-title .glitch::before{color:var(--red);animation:glitch1 3s infinite;clip-path:polygon(0 0,100% 0,100% 33%,0 33%)}
+.hero-title .glitch::after{color:var(--cyan);animation:glitch2 3s infinite;clip-path:polygon(0 67%,100% 67%,100% 100%,0 100%)}
+@keyframes glitch1{0%,95%{transform:none}96%{transform:translate(-3px,-1px)}97%{transform:translate(3px,1px)}98%{transform:translate(-1px,2px)}100%{transform:none}}
+@keyframes glitch2{0%,95%{transform:none}96%{transform:translate(3px,2px)}97%{transform:translate(-2px,-1px)}98%{transform:translate(1px,-2px)}100%{transform:none}}
+.hero-sub{font-size:clamp(14px,2vw,18px);color:var(--text-dim);font-weight:300;margin-bottom:48px;max-width:640px;margin-inline:auto}
+.hero-sub strong{color:var(--red);font-weight:600}
+
+/* Terminal cursor */
+.cursor{display:inline-block;width:10px;height:1.1em;background:var(--green);margin-left:2px;animation:blink 1s step-end infinite;vertical-align:text-bottom}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* CTA */
+.hero-cta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{padding:12px 28px;font-family:var(--font);font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none;border:1px solid;border-radius:2px;transition:all .3s;cursor:pointer}
+.btn-primary{background:var(--green);color:var(--bg);border-color:var(--green)}
+.btn-primary:hover{background:transparent;color:var(--green);box-shadow:0 0 20px var(--green-glow)}
+.btn-ghost{background:transparent;color:var(--text-dim);border-color:var(--border-light)}
+.btn-ghost:hover{color:var(--green);border-color:var(--green)}
+
+/* ═══ ABOUT ═══ */
+#about .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+@media(max-width:768px){#about .about-grid{grid-template-columns:1fr}}
+.about-text{font-size:15px;color:var(--text-dim);line-height:1.9}
+.about-text p{margin-bottom:16px}
+.about-text em{color:var(--green);font-style:normal;font-weight:600}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:24px;text-align:center;transition:border-color .3s}
+.stat-card:hover{border-color:var(--green)}
+.stat-val{font-size:32px;font-weight:800;color:var(--green);line-height:1}
+.stat-label{font-size:11px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:8px}
+
+/* ═══ TEAM ═══ */
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+@media(max-width:900px){.team-grid{grid-template-columns:1fr}}
+.member-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:32px;text-align:center;transition:all .4s;position:relative;overflow:hidden}
+.member-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:0;transition:opacity .4s}
+.member-card:hover{border-color:var(--green);transform:translateY(-4px)}
+.member-card:hover::before{opacity:1}
+.member-avatar{width:100px;height:100px;border-radius:50%;border:2px solid var(--border);margin:0 auto 16px;overflow:hidden;transition:border-color .3s}
+.member-card:hover .member-avatar{border-color:var(--green)}
+.member-avatar img{width:100%;height:100%;object-fit:cover;filter:grayscale(100%);transition:filter .4s}
+.member-card:hover .member-avatar img{filter:grayscale(0%)}
+.member-handle{font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px}
+.member-handle a{color:inherit;text-decoration:none}
+.member-handle a:hover{color:var(--green)}
+.member-role{font-size:12px;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:16px}
+.member-tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:16px}
+.tag{font-size:10px;padding:4px 10px;background:rgba(0,255,65,.06);border:1px solid rgba(0,255,65,.15);border-radius:2px;color:var(--green-dim);letter-spacing:.5px}
+.member-langs{font-size:11px;color:var(--text-muted)}
+
+/* ═══ PROJECTS ═══ */
+.project-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px}
+.project-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:32px;transition:all .4s;position:relative;text-decoration:none;color:inherit;display:block}
+.project-card:hover{border-color:var(--green);transform:translateY(-2px)}
+.project-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:16px}
+.project-name{font-size:20px;font-weight:700;color:var(--text)}
+.project-card:hover .project-name{color:var(--green)}
+.project-lang{font-size:11px;padding:4px 10px;background:var(--bg3);border-radius:2px;color:var(--text-dim)}
+.project-desc{font-size:13px;color:var(--text-dim);line-height:1.7;margin-bottom:16px}
+.project-meta{display:flex;gap:16px;font-size:11px;color:var(--text-muted)}
+.project-meta span::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.meta-stars::before{background:var(--yellow)}
+.meta-license::before{background:var(--green)}
+
+/* ═══ DOMAINS ═══ */
+.domain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.domain-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:20px;transition:border-color .3s}
+.domain-card:hover{border-color:var(--green)}
+.domain-icon{font-size:24px;margin-bottom:8px}
+.domain-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px}
+.domain-items{font-size:11px;color:var(--text-muted);line-height:1.8}
+
+/* ═══ FOOTER ═══ */
+footer{padding:80px 0 40px;text-align:center;border-top:1px solid var(--border)}
+.footer-quote{font-size:14px;color:var(--text-muted);font-style:italic;margin-bottom:8px}
+.footer-quote em{color:var(--green);font-style:normal}
+.footer-attr{font-size:11px;color:var(--text-muted);letter-spacing:2px}
+.footer-copy{font-size:11px;color:var(--text-muted);margin-top:32px}
+
+/* ═══ REVEAL ANIMATION ═══ */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s,transform .6s}
+.reveal.visible{opacity:1;transform:none}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+</style>
+</head>
+<body>
+
+<!-- BOOT SEQUENCE -->
+<div id="boot-screen">
+  <div id="boot-log"></div>
+</div>
+
+<!-- MATRIX RAIN -->
+<canvas id="matrix"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="container">
+    <a href="#hero" class="nav-brand">ZSO<span>://zeroshadowops</span></a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#team">Operators</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#domains">Domains</a></li>
+      <li><a href="https://github.com/ZeroShadowOps" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-pre">[ offensive security collective ]</div>
+    <h1 class="hero-title">
+      <span class="glitch" data-text="ZeroShadowOps">ZeroShadowOps</span>
+    </h1>
+    <p class="hero-sub">
+      We find the flaws that matter — <strong>before someone else does.</strong><br>
+      Vulnerability research. Exploit development. Red teaming.
+    </p>
+    <div class="hero-cta">
+      <a href="https://github.com/ZeroShadowOps" class="btn btn-primary" target="_blank">View Arsenal</a>
+      <a href="#about" class="btn btn-ghost">Learn More</a>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="section-tag">who we are</div>
+    <h2 class="section-title reveal">About ZSO</h2>
+    <div class="about-grid">
+      <div class="about-text reveal reveal-delay-1">
+        <p><em>ZeroShadowOps (ZSO)</em> is an offensive security research group operating at the intersection of red teaming, vulnerability research, and exploit development.</p>
+        <p>We specialize in finding critical vulnerabilities across web applications, smart contracts, binary targets, cloud infrastructure, and AI/ML systems. Our research spans from kernel exploits to prompt injection — wherever the attack surface exists, we operate.</p>
+        <p>We don't patch. <em>We prove it's broken.</em></p>
+      </div>
+      <div class="stat-grid reveal reveal-delay-2">
+        <div class="stat-card"><div class="stat-val">3</div><div class="stat-label">Operators</div></div>
+        <div class="stat-card"><div class="stat-val">6+</div><div class="stat-label">Domains</div></div>
+        <div class="stat-card"><div class="stat-val">11+</div><div class="stat-label">Languages</div></div>
+        <div class="stat-card"><div class="stat-val">0day</div><div class="stat-label">Research</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section id="team">
+  <div class="container">
+    <div class="section-tag">operators</div>
+    <h2 class="section-title reveal">The Team</h2>
+    <div class="team-grid">
+      <div class="member-card reveal reveal-delay-1">
+        <div class="member-avatar"><img src="https://github.com/VoidChecksum.png" alt="VoidChecksum" loading="lazy"></div>
+        <div class="member-handle"><a href="https://github.com/VoidChecksum" target="_blank">VoidChecksum</a></div>
+        <div class="member-role">Offensive Security Engineer</div>
+        <div class="member-tags">
+          <span class="tag">AI Red Teaming</span>
+          <span class="tag">Kernel Research</span>
+          <span class="tag">Bug Bounty</span>
+          <span class="tag">Smart Contracts</span>
+        </div>
+        <div class="member-langs">C++ · Python · Rust · Go · ASM</div>
+      </div>
+      <div class="member-card reveal reveal-delay-2">
+        <div class="member-avatar"><img src="https://github.com/0xyg3n.png" alt="0xyg3n" loading="lazy"></div>
+        <div class="member-handle"><a href="https://github.com/0xyg3n" target="_blank">0xyg3n</a></div>
+        <div class="member-role">Offensive Security Consultant</div>
+        <div class="member-tags">
+          <span class="tag">Exploit Dev</span>
+          <span class="tag">Social Engineering</span>
+          <span class="tag">Red Team</span>
+          <span class="tag">C2 Frameworks</span>
+        </div>
+        <div class="member-langs">C# · Python · Bash · PowerShell</div>
+      </div>
+      <div class="member-card reveal reveal-delay-3">
+        <div class="member-avatar"><img src="https://github.com/Couiz.png" alt="Couiz" loading="lazy"></div>
+        <div class="member-handle"><a href="https://github.com/Couiz" target="_blank">Couiz</a></div>
+        <div class="member-role">Dark Side Operator</div>
+        <div class="member-tags">
+          <span class="tag">Injection</span>
+          <span class="tag">Automation</span>
+          <span class="tag">API Exploitation</span>
+          <span class="tag">Tooling</span>
+        </div>
+        <div class="member-langs">C · C++ · JavaScript · Bash · ASM</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="container">
+    <div class="section-tag">arsenal</div>
+    <h2 class="section-title reveal">Projects</h2>
+    <div class="project-grid">
+      <a href="https://github.com/ZeroShadowOps/AiProxy" class="project-card reveal reveal-delay-1" target="_blank">
+        <div class="project-header">
+          <span class="project-name">AiProxy</span>
+          <span class="project-lang">Python</span>
+        </div>
+        <p class="project-desc">Unified OpenAI-compatible API proxy that routes through multiple free AI providers. Auto-reward system, smart account rotation, streaming support. 861+ models including GPT-5, Claude Opus 4.6, Gemini 3.1.</p>
+        <div class="project-meta">
+          <span class="meta-license">GPL-3.0</span>
+        </div>
+      </a>
+      <a href="https://github.com/ZeroShadowOps" class="project-card reveal reveal-delay-2" target="_blank">
+        <div class="project-header">
+          <span class="project-name">More Coming</span>
+          <span class="project-lang">???</span>
+        </div>
+        <p class="project-desc">New tools and research are always in development. Exploit frameworks, vulnerability scanners, security automation — watch this space.</p>
+        <div class="project-meta">
+          <span class="meta-stars">In progress</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- DOMAINS -->
+<section id="domains">
+  <div class="container">
+    <div class="section-tag">expertise</div>
+    <h2 class="section-title reveal">Domains</h2>
+    <div class="domain-grid">
+      <div class="domain-card reveal">
+        <div class="domain-icon">&#x1f578;</div>
+        <div class="domain-name">Web & Application Security</div>
+        <div class="domain-items">SSRF · XSS · SQLi · IDOR · OAuth Bypass · API Security · GraphQL · Business Logic · Subdomain Takeover</div>
+      </div>
+      <div class="domain-card reveal reveal-delay-1">
+        <div class="domain-icon">&#x26d3;</div>
+        <div class="domain-name">Smart Contracts & Blockchain</div>
+        <div class="domain-items">DeFi Audits · Bridge Exploits · Flash Loans · MEV · Oracle Manipulation · EVM Analysis · Governance Attacks</div>
+      </div>
+      <div class="domain-card reveal reveal-delay-2">
+        <div class="domain-icon">&#x1f4bb;</div>
+        <div class="domain-name">Binary & Low-Level</div>
+        <div class="domain-items">Exploit Dev · Reverse Engineering · Kernel Exploits · Heap Corruption · Fuzzing · Sandbox Escapes · EDR Evasion</div>
+      </div>
+      <div class="domain-card reveal reveal-delay-3">
+        <div class="domain-icon">&#x2601;</div>
+        <div class="domain-name">Infrastructure & Red Team</div>
+        <div class="domain-items">Pentesting · Cloud Security · AD Attacks · Container Escapes · CI/CD Poisoning · C2 Development · Network Exploitation</div>
+      </div>
+      <div class="domain-card reveal">
+        <div class="domain-icon">&#x1f916;</div>
+        <div class="domain-name">AI & Emerging</div>
+        <div class="domain-items">LLM Fuzzing · Prompt Injection · Model Poisoning · RAG Attacks · AI Agent Exploitation · Supply Chain · Zero-Day Research</div>
+      </div>
+      <div class="domain-card reveal reveal-delay-1">
+        <div class="domain-icon">&#x1f4f1;</div>
+        <div class="domain-name">Mobile & Client-Side</div>
+        <div class="domain-items">Android Reversing · iOS Reversing · API Hooking · Electron Exploits · Browser Extensions · Desktop App Security</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p class="footer-quote">"The quiet ones have already been inside your network."</p>
+    <p class="footer-attr">— ZeroShadowOps</p>
+    <p class="footer-copy">&copy; 2026 ZeroShadowOps. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+// ═══ BOOT SEQUENCE ═══
+const bootLines = [
+  {text:'[    0.000000] ZSO kernel: initializing...', cls:'dim'},
+  {text:'[    0.012847] Loading offensive modules...', cls:'dim'},
+  {text:'[    0.045923] recon.ko          [  OK  ]', cls:'ok'},
+  {text:'[    0.089341] exploit.ko        [  OK  ]', cls:'ok'},
+  {text:'[    0.124589] c2_framework.ko   [  OK  ]', cls:'ok'},
+  {text:'[    0.167234] ai_redteam.ko     [  OK  ]', cls:'ok'},
+  {text:'[    0.198456] evasion.ko        [  OK  ]', cls:'ok'},
+  {text:'[    0.234123] Mounting attack surface...', cls:'dim'},
+  {text:'[    0.278901] 3 operators loaded', cls:'ok'},
+  {text:'[    0.312456] ZeroShadowOps v2.0 ready', cls:'ok'},
+  {text:'', cls:'dim'},
+  {text:'root@zso:~# ./launch --mode stealth', cls:'ok'},
+];
+const bootLog = document.getElementById('boot-log');
+const bootScreen = document.getElementById('boot-screen');
+let bootIdx = 0;
+function addBootLine(){
+  if(bootIdx >= bootLines.length){
+    setTimeout(()=> bootScreen.classList.add('done'), 400);
+    return;
+  }
+  const l = bootLines[bootIdx++];
+  const div = document.createElement('div');
+  div.className = 'line ' + l.cls;
+  div.textContent = l.text;
+  div.style.animationDelay = '0s';
+  bootLog.appendChild(div);
+  setTimeout(addBootLine, 60 + Math.random() * 40);
+}
+addBootLine();
+
+// ═══ MATRIX RAIN ═══
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
+function resizeMatrix(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+resizeMatrix();
+window.addEventListener('resize', resizeMatrix);
+const chars='01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+const fontSize=14;
+let columns=Math.floor(canvas.width/fontSize);
+let drops=Array(columns).fill(1);
+function drawMatrix(){
+  ctx.fillStyle='rgba(10,10,10,.05)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#00ff41';
+  ctx.font=fontSize+'px monospace';
+  for(let i=0;i<drops.length;i++){
+    const t=chars[Math.floor(Math.random()*chars.length)];
+    ctx.fillText(t,i*fontSize,drops[i]*fontSize);
+    if(drops[i]*fontSize>canvas.height && Math.random()>.975) drops[i]=0;
+    drops[i]++;
+  }
+}
+setInterval(drawMatrix,50);
+
+// ═══ SCROLL REVEAL ═══
+const reveals=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:.15});
+reveals.forEach(el=>observer.observe(el));
+
+// ═══ TYPING EFFECT IN HERO ═══
+const heroSub = document.querySelector('.hero-sub');
+if(heroSub){
+  const cursor = document.createElement('span');
+  cursor.className='cursor';
+  heroSub.parentElement.insertBefore(cursor, heroSub.nextSibling);
+  setTimeout(()=>cursor.remove(), 4000);
+}
+</script>
+</body>
+</html>
