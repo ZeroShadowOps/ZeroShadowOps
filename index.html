@@ -73,48 +73,98 @@ nav .container{display:flex;justify-content:space-between;align-items:center}
 
 /* ═══ HERO ═══ */
 #hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden}
-.hero-content{position:relative;z-index:2}
-.hero-pre{font-size:13px;color:var(--text-muted);letter-spacing:6px;text-transform:uppercase;margin-bottom:24px}
-.hero-title{font-size:clamp(48px,8vw,96px);font-weight:800;line-height:1;letter-spacing:-2px;margin-bottom:16px;position:relative}
-/* Per-word hero styling */
+#hero::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(ellipse 80% 50% at 50% 50%,rgba(0,255,65,.04) 0%,transparent 70%),
+  radial-gradient(circle at 20% 80%,rgba(0,255,65,.02) 0%,transparent 40%),
+  radial-gradient(circle at 80% 20%,rgba(255,255,255,.01) 0%,transparent 40%);pointer-events:none}
+
+.hero-content{position:relative;z-index:2;max-width:900px;padding:0 24px}
+
+/* Pre-title tag */
+.hero-pre{font-size:12px;color:var(--green-dim);letter-spacing:5px;text-transform:uppercase;margin-bottom:32px;
+  display:inline-flex;align-items:center;gap:12px;padding:6px 20px;
+  border:1px solid rgba(0,255,65,.12);border-radius:100px;background:rgba(0,255,65,.03)}
+.hero-pre::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse-dot 2s ease infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+/* Title */
+.hero-title{font-size:clamp(52px,9vw,110px);font-weight:800;line-height:.95;letter-spacing:-3px;margin-bottom:24px;position:relative}
 .hero-title span{position:relative;display:inline-block}
 
-/* "Zero" — cold white with subtle blue shift */
-.word-zero{color:#e0e8f0;text-shadow:0 0 40px rgba(200,220,255,.15)}
-.word-zero::before{content:attr(data-text);position:absolute;top:0;left:0;color:rgba(0,212,255,.6);clip-path:polygon(0 0,100% 0,100% 33%,0 33%);animation:g1 4s infinite}
+/* "Zero" — pure white, clean */
+.word-zero{color:#ffffff;opacity:.95}
 
-/* "Shadow" — blood red, heavier glitch */
-.word-shadow{color:var(--red);text-shadow:0 0 30px rgba(255,0,64,.3),0 0 80px rgba(255,0,64,.1)}
-.word-shadow::before{content:attr(data-text);position:absolute;top:0;left:0;color:rgba(255,0,64,.5);clip-path:polygon(0 40%,100% 40%,100% 60%,0 60%);animation:g2 2.5s infinite}
-.word-shadow::after{content:attr(data-text);position:absolute;top:0;left:0;color:rgba(155,89,182,.4);clip-path:polygon(0 70%,100% 70%,100% 100%,0 100%);animation:g3 3s infinite}
+/* "Shadow" — mid grey, recedes */
+.word-shadow{color:#6e7681;transition:color .4s}
+.hero-title:hover .word-shadow{color:#8b949e}
 
-/* "Ops" — neon green, electric */
-.word-ops{color:var(--green);text-shadow:0 0 20px rgba(0,255,65,.4),0 0 60px rgba(0,255,65,.15),0 0 120px rgba(0,255,65,.05)}
-.word-ops::before{content:attr(data-text);position:absolute;top:0;left:0;color:rgba(0,255,65,.5);clip-path:polygon(0 0,100% 0,100% 30%,0 30%);animation:g1 3.5s infinite}
+/* "Ops" — green accent, the anchor */
+.word-ops{color:var(--green);text-shadow:0 0 30px rgba(0,255,65,.25),0 0 80px rgba(0,255,65,.08)}
 
-/* Glitch keyframes — each slightly different */
-@keyframes g1{0%,93%{transform:none}94%{transform:translate(-2px,-1px)}95%{transform:translate(3px,1px)}96%{transform:translate(-1px,2px)}97%{transform:none}98%{transform:translate(2px,-1px)}100%{transform:none}}
-@keyframes g2{0%,90%{transform:none}91%{transform:translate(4px,1px) skewX(2deg)}93%{transform:translate(-3px,-1px) skewX(-1deg)}95%{transform:translate(2px,2px)}96%{transform:none}98%{transform:translate(-2px,1px) skewX(1deg)}100%{transform:none}}
-@keyframes g3{0%,92%{transform:none}93%{transform:translate(-3px,2px)}95%{transform:translate(2px,-2px) skewX(-2deg)}97%{transform:translate(1px,1px)}100%{transform:none}}
+/* Glitch — subtle, only on the full title */
+.hero-title::after{content:'ZeroShadowOps';position:absolute;top:0;left:0;right:0;
+  font-size:inherit;font-weight:inherit;letter-spacing:inherit;
+  color:rgba(0,255,65,.06);clip-path:polygon(0 45%,100% 45%,100% 55%,0 55%);
+  animation:title-glitch 6s step-end infinite;pointer-events:none}
+@keyframes title-glitch{
+  0%,92%{transform:none;opacity:0}
+  93%{transform:translate(4px,0);opacity:1}
+  94%{transform:translate(-3px,0);opacity:1}
+  95%{transform:translate(2px,0);opacity:.5}
+  96%{transform:none;opacity:0}
+}
 
-/* Hover intensify */
-.hero-title:hover .word-shadow{animation:flicker .15s infinite;text-shadow:0 0 40px rgba(255,0,64,.5),0 0 100px rgba(255,0,64,.2)}
-.hero-title:hover .word-ops{text-shadow:0 0 30px rgba(0,255,65,.6),0 0 80px rgba(0,255,65,.25)}
-@keyframes flicker{0%{opacity:1}25%{opacity:.85}50%{opacity:1}75%{opacity:.9}100%{opacity:1}}
-.hero-sub{font-size:clamp(14px,2vw,18px);color:var(--text-dim);font-weight:300;margin-bottom:48px;max-width:640px;margin-inline:auto}
-.hero-sub strong{color:var(--red);font-weight:600}
+/* Underline accent */
+.hero-line{display:block;width:80px;height:2px;background:var(--green);margin:0 auto 32px;
+  box-shadow:0 0 12px rgba(0,255,65,.3);border-radius:2px;
+  animation:line-expand 1.5s ease forwards;transform-origin:center}
+@keyframes line-expand{from{width:0;opacity:0}to{width:80px;opacity:1}}
 
-/* Terminal cursor */
-.cursor{display:inline-block;width:10px;height:1.1em;background:var(--green);margin-left:2px;animation:blink 1s step-end infinite;vertical-align:text-bottom}
+/* Subtitle */
+.hero-sub{font-size:clamp(15px,1.8vw,18px);color:#8b949e;font-weight:300;margin-bottom:20px;
+  max-width:580px;margin-inline:auto;line-height:1.8}
+.hero-sub strong{color:#ffffff;font-weight:500}
+
+/* Terminal prompt line */
+.hero-terminal{font-size:13px;color:var(--text-muted);margin-bottom:48px;
+  font-family:var(--font);letter-spacing:.5px}
+.hero-terminal .prompt{color:var(--green)}
+.hero-terminal .cmd{color:#8b949e}
+.hero-terminal .cursor{display:inline-block;width:8px;height:14px;background:var(--green);
+  margin-left:3px;animation:blink 1s step-end infinite;vertical-align:text-bottom}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
-/* CTA */
+/* CTA buttons */
 .hero-cta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
-.btn{padding:12px 28px;font-family:var(--font);font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none;border:1px solid;border-radius:2px;transition:all .3s;cursor:pointer}
-.btn-primary{background:var(--green);color:var(--bg);border-color:var(--green)}
-.btn-primary:hover{background:transparent;color:var(--green);box-shadow:0 0 20px var(--green-glow)}
-.btn-ghost{background:transparent;color:var(--text-dim);border-color:var(--border-light)}
-.btn-ghost:hover{color:var(--green);border-color:var(--green)}
+.btn{padding:14px 32px;font-family:var(--font);font-size:12px;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;text-decoration:none;
+  border:1px solid;border-radius:2px;transition:all .35s;cursor:pointer;position:relative;overflow:hidden}
+.btn::before{content:'';position:absolute;inset:0;background:currentColor;opacity:0;transition:opacity .35s}
+.btn:hover::before{opacity:.06}
+
+.btn-primary{background:var(--green);color:var(--bg);border-color:var(--green);
+  box-shadow:0 0 20px rgba(0,255,65,.15)}
+.btn-primary:hover{background:transparent;color:var(--green);
+  box-shadow:0 0 30px rgba(0,255,65,.25),inset 0 0 30px rgba(0,255,65,.05)}
+
+.btn-ghost{background:transparent;color:#6e7681;border-color:#30363d}
+.btn-ghost:hover{color:#e6edf3;border-color:#6e7681}
+
+/* Stats bar under CTA */
+.hero-stats{display:flex;gap:40px;justify-content:center;margin-top:56px;flex-wrap:wrap}
+.hero-stat{text-align:center}
+.hero-stat-val{font-size:24px;font-weight:700;color:#ffffff;display:block}
+.hero-stat-val.green{color:var(--green)}
+.hero-stat-label{font-size:10px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px;display:block}
+
+/* Scroll indicator */
+.scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;opacity:.3;animation:float 3s ease infinite}
+.scroll-hint span{font-size:10px;color:var(--text-muted);letter-spacing:3px;text-transform:uppercase}
+.scroll-arrow{width:1px;height:30px;background:linear-gradient(to bottom,transparent,var(--green));position:relative}
+.scroll-arrow::after{content:'';position:absolute;bottom:0;left:-3px;width:7px;height:7px;
+  border-right:1px solid var(--green);border-bottom:1px solid var(--green);transform:rotate(45deg)}
+@keyframes float{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
 
 /* ═══ ABOUT ═══ */
 #about .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
@@ -211,18 +261,32 @@ footer{padding:80px 0 40px;text-align:center;border-top:1px solid var(--border)}
 <!-- HERO -->
 <section id="hero">
   <div class="hero-content">
-    <div class="hero-pre">[ offensive security collective ]</div>
+    <div class="hero-pre">offensive security collective</div>
     <h1 class="hero-title">
-      <span class="word-zero" data-text="Zero">Zero</span><span class="word-shadow" data-text="Shadow">Shadow</span><span class="word-ops" data-text="Ops">Ops</span>
+      <span class="word-zero">Zero</span><span class="word-shadow">Shadow</span><span class="word-ops">Ops</span>
     </h1>
+    <div class="hero-line"></div>
     <p class="hero-sub">
-      We find the flaws that matter — <strong>before someone else does.</strong><br>
+      We find the flaws that matter &mdash; <strong>before someone else does.</strong><br>
       Vulnerability research. Exploit development. Red teaming.
     </p>
+    <div class="hero-terminal">
+      <span class="prompt">root@zso</span><span class="cmd">:~# ./engage --mode stealth</span><span class="cursor"></span>
+    </div>
     <div class="hero-cta">
       <a href="https://github.com/ZeroShadowOps" class="btn btn-primary" target="_blank">View Arsenal</a>
       <a href="#about" class="btn btn-ghost">Learn More</a>
     </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-val">3</span><span class="hero-stat-label">Operators</span></div>
+      <div class="hero-stat"><span class="hero-stat-val green">11+</span><span class="hero-stat-label">Languages</span></div>
+      <div class="hero-stat"><span class="hero-stat-val">6</span><span class="hero-stat-label">Domains</span></div>
+      <div class="hero-stat"><span class="hero-stat-val green">0day</span><span class="hero-stat-label">Research</span></div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-arrow"></div>
   </div>
 </section>
 
